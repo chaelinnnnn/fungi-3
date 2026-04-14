@@ -2,554 +2,384 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fungi POV</title>
+<title>Test 2 — Fission</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital@0;1&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;}
-:root{--bg:#080808;--fg:#e8e4d8;--dim:rgba(232,228,216,0.25);--dimmer:rgba(232,228,216,0.08);}
-html,body{width:100%;height:100%;background:var(--bg);color:var(--fg);font-family:'Space Mono',monospace;overflow:hidden;}
-#index{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:10vw;z-index:10;transition:opacity 0.8s ease;}
-#index.hidden{opacity:0;pointer-events:none;}
-#index h1{font-size:clamp(10px,1vw,13px);letter-spacing:0.3em;color:var(--dim);margin-bottom:clamp(32px,6vh,64px);font-style:italic;}
-.entry{display:flex;align-items:baseline;gap:24px;padding:14px 0;border-top:0.5px solid rgba(232,228,216,0.1);cursor:pointer;transition:all 0.2s ease;width:100%;max-width:600px;}
-.entry:last-child{border-bottom:0.5px solid rgba(232,228,216,0.1);}
-.entry:hover .entry-name{color:var(--fg);}
-.entry:hover .entry-arrow{opacity:1;transform:translateX(4px);}
-.entry:hover .entry-num{color:var(--fg);}
-.entry-num{font-size:clamp(9px,0.9vw,11px);color:var(--dimmer);letter-spacing:0.2em;min-width:28px;transition:color 0.2s;}
-.entry-name{font-size:clamp(13px,1.6vw,20px);letter-spacing:0.05em;color:rgba(232,228,216,0.6);transition:color 0.2s;flex:1;}
-.entry-latin{font-size:clamp(9px,0.85vw,11px);color:var(--dimmer);font-style:italic;letter-spacing:0.1em;}
-.entry-arrow{font-size:12px;color:var(--dim);opacity:0;transition:all 0.2s ease;}
-canvas{display:block;width:100%;height:100%;}
-#back{position:fixed;top:28px;left:28px;z-index:20;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.25em;color:var(--dim);cursor:pointer;opacity:0;pointer-events:none;transition:opacity 0.6s ease,color 0.2s;background:none;border:none;}
-#back:hover{color:var(--fg);}
-#back.visible{opacity:1;pointer-events:all;}
-#species-label{position:fixed;bottom:28px;left:28px;z-index:20;opacity:0;pointer-events:none;transition:opacity 0.6s ease;}
-#species-label.visible{opacity:1;}
-.sname{font-family:'Space Mono',monospace;font-size:clamp(9px,0.85vw,11px);letter-spacing:0.25em;color:var(--dim);font-style:italic;}
-.sdesc{font-family:'Space Mono',monospace;font-size:clamp(8px,0.75vw,10px);letter-spacing:0.15em;color:rgba(232,228,216,0.2);margin-top:4px;}
-#phase-label{position:fixed;top:28px;right:28px;z-index:20;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.3em;color:var(--dim);opacity:0;pointer-events:none;transition:opacity 0.6s ease;}
-#phase-label.visible{opacity:1;}
-#hint{position:fixed;bottom:28px;right:28px;z-index:20;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.2em;color:rgba(232,228,216,0.18);opacity:0;pointer-events:none;transition:opacity 0.6s ease;}
-#hint.visible{opacity:1;}
-#sound-btn{position:fixed;top:28px;left:50%;transform:translateX(-50%);z-index:20;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.2em;color:rgba(232,228,216,0.2);cursor:pointer;background:none;border:none;opacity:0;pointer-events:none;transition:opacity 0.6s ease,color 0.2s;white-space:nowrap;}
-#sound-btn:hover{color:rgba(232,228,216,0.5);}
-#sound-btn.visible{opacity:1;pointer-events:all;}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #7a7a7a; width: 100vw; height: 100vh; overflow: hidden; cursor: none; }
+  canvas { display: block; position: fixed; inset: 0; }
+
+  /* Environment HUD */
+  #hud {
+    position: fixed; bottom: 48px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 32px; align-items: flex-end;
+    z-index: 10; pointer-events: none;
+  }
+  .env-var {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .env-label {
+    font-family: 'Courier New', monospace; font-size: 9px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+  }
+  .env-bar-wrap {
+    width: 60px; height: 3px; background: rgba(255,255,255,0.12);
+    border-radius: 2px; overflow: hidden;
+  }
+  .env-bar {
+    height: 100%; border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+  #bar-temp { background: rgba(255,160,80,0.7); }
+  #bar-wind { background: rgba(160,220,255,0.7); }
+  #bar-humid { background: rgba(180,255,180,0.7); }
+
+  #title {
+    position: fixed; top: 32px; left: 40px;
+    font-family: 'Courier New', monospace; font-size: 10px;
+    letter-spacing: 0.2em; color: rgba(255,255,255,0.22);
+    text-transform: uppercase; z-index: 10; pointer-events: none;
+  }
+  #reset-btn {
+    position: fixed; top: 28px; right: 36px;
+    font-family: 'Courier New', monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(255,255,255,0.22); background: none;
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 6px 14px; cursor: pointer; transition: all 0.3s; z-index: 10;
+  }
+  #reset-btn:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.35); }
+
+  /* custom cursor */
+  #cursor {
+    position: fixed; pointer-events: none; z-index: 20;
+    width: 12px; height: 12px;
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 50%;
+    transform: translate(-50%,-50%);
+    transition: width 0.2s, height 0.2s, border-color 0.2s;
+  }
+  #cursor.hot {
+    width: 20px; height: 20px;
+    border-color: rgba(255,160,80,0.7);
+  }
 </style>
 </head>
 <body>
+<div id="title">Test 02 — Fission</div>
+<div id="cursor"></div>
 <canvas id="c"></canvas>
-<div id="index">
-  <h1>fungi / point of view</h1>
-  <div class="entry" onclick="launch(0)"><span class="entry-num">01</span><span class="entry-name">Mucor</span><span class="entry-latin">Mucor mucedo</span><span class="entry-arrow">→</span></div>
-  <div class="entry" onclick="launch(1)"><span class="entry-num">02</span><span class="entry-name">Lycoperdon</span><span class="entry-latin">Lycoperdon perlatum</span><span class="entry-arrow">→</span></div>
-  <div class="entry" onclick="launch(2)"><span class="entry-num">03</span><span class="entry-name">Aspergillus</span><span class="entry-latin">Aspergillus niger</span><span class="entry-arrow">→</span></div>
-  <div class="entry" onclick="launch(3)"><span class="entry-num">04</span><span class="entry-name">Cordyceps</span><span class="entry-latin">Ophiocordyceps unilateralis</span><span class="entry-arrow">→</span></div>
-  <div class="entry" onclick="launch(4)"><span class="entry-num">05</span><span class="entry-name">Bioluminescent</span><span class="entry-latin">Panellus stipticus</span><span class="entry-arrow">→</span></div>
+<button id="reset-btn" onclick="resetAll()">Clear</button>
+
+<div id="hud">
+  <div class="env-var">
+    <div class="env-label">Temp</div>
+    <div class="env-bar-wrap"><div class="env-bar" id="bar-temp" style="width:0%"></div></div>
+  </div>
+  <div class="env-var">
+    <div class="env-label">Wind</div>
+    <div class="env-bar-wrap"><div class="env-bar" id="bar-wind" style="width:0%"></div></div>
+  </div>
+  <div class="env-var">
+    <div class="env-label">Humidity</div>
+    <div class="env-bar-wrap"><div class="env-bar" id="bar-humid" style="width:0%"></div></div>
+  </div>
 </div>
-<button id="back" onclick="goBack()">← back</button>
-<button id="sound-btn" onclick="toggleSound()">♪ sound on</button>
-<div id="species-label"><div class="sname" id="sname"></div><div class="sdesc" id="sdesc"></div></div>
-<div id="phase-label"></div>
-<div id="hint"></div>
 
 <script>
-const canvas=document.getElementById('c');
-const ctx=canvas.getContext('2d');
-const indexEl=document.getElementById('index');
-const backEl=document.getElementById('back');
-const soundBtn=document.getElementById('sound-btn');
-const snameEl=document.getElementById('sname');
-const sdescEl=document.getElementById('sdesc');
-const speciesEl=document.getElementById('species-label');
-const phaseEl=document.getElementById('phase-label');
-const hintEl=document.getElementById('hint');
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+let W = canvas.width  = window.innerWidth;
+let H = canvas.height = window.innerHeight;
 
-let W,H;
-function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
-resize();
-window.addEventListener('resize',resize);
+const cursorEl   = document.getElementById('cursor');
+const barTemp    = document.getElementById('bar-temp');
+const barWind    = document.getElementById('bar-wind');
+const barHumid   = document.getElementById('bar-humid');
 
-// ─── AUDIO ───────────────────────────────────────────────
-let AC=null, soundOn=false;
-let ambOscs=[], ambGain=null;
+// ── Environment state ──
+const env = {
+  mouseX: W/2, mouseY: H/2,
+  speedX: 0,   speedY: 0,
+  windX:  0,   windY:  0,   // smoothed wind
+  temp:   0,   // 0–1, based on proximity to blobs
+  wind:   0,   // 0–1, mouse speed
+  humid:  0,   // 0–1, decays over time, boosted by click
+  humidPoints: [], // [{x,y,r,strength}] moisture spots
+};
 
-function getAC(){
-  if(!AC){
-    const Ctor=window.AudioContext||window.webkitAudioContext;
-    AC=new Ctor();
-  }
-  if(AC.state==='suspended') AC.resume();
-  return AC;
-}
+let prevX = W/2, prevY = H/2;
 
-function toggleSound(){
-  soundOn=!soundOn;
-  soundBtn.textContent=soundOn?'♪ sound off':'♪ sound on';
-  if(soundOn){ getAC(); startAmbient(currentSpecies); }
-  else stopAmbient();
-}
-
-function stopAmbient(){
-  ambOscs.forEach(o=>{try{o.stop();}catch(e){}});
-  ambOscs=[]; ambGain=null;
-}
-
-function makeAmbient(freqs,type,vol,lfoHz,lfoDepth){
-  if(!soundOn) return;
-  const ac=getAC();
-  const master=ac.createGain();
-  master.gain.value=0;
-  master.connect(ac.destination);
-  ambGain=master;
-  const oscs=[];
-  freqs.forEach(f=>{
-    const o=ac.createOscillator();
-    o.type=type; o.frequency.value=f;
-    o.connect(master); o.start();
-    oscs.push(o);
-  });
-  if(lfoHz>0){
-    const lfo=ac.createOscillator();
-    const lg=ac.createGain();
-    lfo.frequency.value=lfoHz; lg.gain.value=lfoDepth;
-    lfo.connect(lg);
-    oscs.forEach(o=>lg.connect(o.frequency));
-    lfo.start(); oscs.push(lfo);
-  }
-  ambOscs=oscs;
-  // Safari-safe: ramp after a tick
-  setTimeout(()=>{
-    if(!ambGain) return;
-    const now=ac.currentTime;
-    ambGain.gain.setValueAtTime(0,now);
-    ambGain.gain.linearRampToValueAtTime(vol,now+2);
-  },50);
-}
-
-function startAmbient(i){
-  if(!soundOn||i<0) return;
-  stopAmbient();
-  setTimeout(()=>{
-    if(!soundOn) return;
-    if(i===0) makeAmbient([55,82.5],'sine',0.07,0.3,5);
-    if(i===1) makeAmbient([200,201],'sawtooth',0.03,0,0);
-    if(i===2) makeAmbient([220,330],'sawtooth',0.025,0,0);
-    if(i===3) makeAmbient([40,41],'triangle',0.09,0.12,1);
-    if(i===4) makeAmbient([440,528],'sine',0.04,0.5,8);
-  },100);
-}
-
-function playSFX(type){
-  if(!soundOn) return;
-  const ac=getAC();
-  const now=ac.currentTime;
-  try{
-    if(type==='mucor'){
-      const o=ac.createOscillator(),g=ac.createGain();
-      o.type='sine'; o.frequency.value=60+Math.random()*30;
-      g.gain.setValueAtTime(0.15,now);
-      g.gain.linearRampToValueAtTime(0.001,now+0.5);
-      o.connect(g); g.connect(ac.destination); o.start(now); o.stop(now+0.5);
-    }
-    if(type==='lyco'){
-      const buf=ac.createBuffer(1,Math.floor(ac.sampleRate*0.2),ac.sampleRate);
-      const d=buf.getChannelData(0);
-      for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(ac.sampleRate*0.04));
-      const src=ac.createBufferSource(),g=ac.createGain();
-      const f=ac.createBiquadFilter(); f.type='bandpass'; f.frequency.value=250; f.Q.value=1.5;
-      src.buffer=buf; g.gain.value=0.45;
-      src.connect(f); f.connect(g); g.connect(ac.destination); src.start(now);
-    }
-    if(type==='asp'){
-      const o=ac.createOscillator(),g=ac.createGain();
-      o.type='square'; o.frequency.value=400+Math.random()*300;
-      g.gain.setValueAtTime(0.05,now);
-      g.gain.linearRampToValueAtTime(0.001,now+0.12);
-      o.connect(g); g.connect(ac.destination); o.start(now); o.stop(now+0.12);
-    }
-    if(type==='cord'){
-      const o=ac.createOscillator(),g=ac.createGain();
-      o.type='triangle';
-      o.frequency.setValueAtTime(90,now);
-      o.frequency.linearRampToValueAtTime(28,now+0.4);
-      g.gain.setValueAtTime(0.2,now);
-      g.gain.linearRampToValueAtTime(0.001,now+0.5);
-      o.connect(g); g.connect(ac.destination); o.start(now); o.stop(now+0.5);
-    }
-    if(type==='pane'){
-      const o=ac.createOscillator(),g=ac.createGain();
-      o.type='sine'; o.frequency.value=700+Math.random()*600;
-      g.gain.setValueAtTime(0.1,now);
-      g.gain.linearRampToValueAtTime(0.001,now+1.0);
-      o.connect(g); g.connect(ac.destination); o.start(now); o.stop(now+1.0);
-    }
-  }catch(e){}
-}
-
-// ─── STATE ───────────────────────────────────────────────
-let mouse={x:0,y:0},prevMouse={x:0,y:0};
-let moved=false,stillTime=0,frame=0,currentSpecies=-1;
-let particles=[],threads=[],colonies=[],pulses=[],trails=[],network=[];
-
-const SPECIES=[
-  {name:'Mucor mucedo',desc:'move to sense — pause to consume',hint:'MOVE / PAUSE'},
-  {name:'Lycoperdon perlatum',desc:'click to release spores',hint:'CLICK'},
-  {name:'Aspergillus niger',desc:'draw your path — watch it radiate',hint:'MOVE'},
-  {name:'Ophiocordyceps unilateralis',desc:'trail left behind becomes territory',hint:'MOVE'},
-  {name:'Panellus stipticus',desc:'darkness reveals the network',hint:'MOVE'}
+// ── Palette ──
+const COLORS = [
+  [232,120,152],[240,128,80],[200,136,216],
+  [240,100,100],[216,160,216],[245,160,100],
 ];
+let colorIdx = 0;
+function nextColor() { return COLORS[colorIdx++ % COLORS.length]; }
 
-function onMove(cx,cy){
-  prevMouse={...mouse}; mouse.x=cx; mouse.y=cy;
-  if(currentSpecies>=0){moved=true;stillTime=0;}
+// ── Blob ──
+const SCALE = 2;
+let sw = Math.ceil(W/SCALE), sh = Math.ceil(H/SCALE);
+let blobs = [];
+
+class Blob {
+  constructor(x, y, r, color) {
+    this.x = x; this.y = y; this.r = r;
+    this.baseR = r;
+    this.color = color;
+    this.vx = (Math.random()-.5)*.8;
+    this.vy = (Math.random()-.5)*.8;
+    this.wobble = Math.random()*Math.PI*2;
+    this.wobbleSpeed = .007+Math.random()*.007;
+    this.age = 0;
+  }
+
+  update() {
+    this.age++;
+    this.wobble += this.wobbleSpeed;
+
+    // ── Temperature: proximity to mouse → speed multiplier ──
+    const dx = this.x - env.mouseX, dy = this.y - env.mouseY;
+    const distToMouse = Math.sqrt(dx*dx + dy*dy);
+    const proximity   = Math.max(0, 1 - distToMouse / (Math.min(W,H)*0.45));
+    const tempEffect  = 0.4 + proximity * 2.2; // 0.4 cold → 2.6 hot
+
+    // ── Wind: push blobs in mouse movement direction ──
+    this.vx += env.windX * 0.012;
+    this.vy += env.windY * 0.012;
+
+    // ── Base drift (scaled by temperature) ──
+    this.vx += (Math.random()-.5) * 0.04 * tempEffect;
+    this.vy += (Math.random()-.5) * 0.04 * tempEffect;
+    this.vx *= (0.97 - proximity * 0.02); // more active = less damping
+    this.vy *= (0.97 - proximity * 0.02);
+
+    this.x += this.vx + Math.sin(this.wobble) * 0.15 * tempEffect;
+    this.y += this.vy + Math.cos(this.wobble*.75) * 0.15 * tempEffect;
+
+    // ── Humidity: grow toward moisture spots ──
+    let humidGrowth = 0;
+    env.humidPoints.forEach(hp => {
+      const hdx = this.x - hp.x, hdy = this.y - hp.y;
+      const hd  = Math.sqrt(hdx*hdx + hdy*hdy);
+      if (hd < hp.r * 2.5) {
+        humidGrowth += hp.strength * (1 - hd / (hp.r*2.5));
+        // attract toward moisture
+        this.vx -= (hdx / (hd+1)) * hp.strength * 0.04;
+        this.vy -= (hdy / (hd+1)) * hp.strength * 0.04;
+      }
+    });
+    // radius grows with humidity, shrinks back without
+    const targetR = this.baseR * (1 + humidGrowth * 0.8);
+    this.r += (targetR - this.r) * 0.04;
+
+    // boundary
+    const pad = this.r*.5;
+    if (this.x<pad)     { this.x=pad;     this.vx= Math.abs(this.vx)*.6; }
+    if (this.x>W-pad)   { this.x=W-pad;   this.vx=-Math.abs(this.vx)*.6; }
+    if (this.y<pad)     { this.y=pad;      this.vy= Math.abs(this.vy)*.6; }
+    if (this.y>H-pad)   { this.y=H-pad;   this.vy=-Math.abs(this.vy)*.6; }
+
+    // split if very hot + large
+    if (proximity > 0.7 && this.r > 90 && Math.random() < 0.004 * proximity) {
+      this.split();
+    }
+  }
+
+  split() {
+    const newR = this.r * 0.62;
+    const count = 2+Math.floor(Math.random()*2);
+    for (let i=0; i<count; i++) {
+      const a = (i/count)*Math.PI*2+Math.random()*.5;
+      const b = new Blob(
+        this.x+Math.cos(a)*this.r*.4,
+        this.y+Math.sin(a)*this.r*.4,
+        newR, this.color
+      );
+      b.baseR = newR;
+      b.vx = Math.cos(a)*(1.5+Math.random());
+      b.vy = Math.sin(a)*(1.5+Math.random());
+      blobs.push(b);
+    }
+    this.r = 0; // mark for removal
+  }
 }
-window.addEventListener('mousemove',e=>onMove(e.clientX,e.clientY));
-window.addEventListener('touchmove',e=>{e.preventDefault();onMove(e.touches[0].clientX,e.touches[0].clientY);},{passive:false});
-window.addEventListener('click',e=>{
-  if(currentSpecies===1) spawnExplosion(mouse.x,mouse.y);
+
+// ── Render: per-pixel metaball with color blending ──
+const BG = [122,122,122];
+
+function render() {
+  const img  = ctx.createImageData(W, H);
+  const data = img.data;
+
+  for (let py=0; py<sh; py++) {
+    for (let px=0; px<sw; px++) {
+      const wx = px*SCALE, wy = py*SCALE;
+      let totalF=0, wR=0, wG=0, wB=0;
+
+      for (const b of blobs) {
+        const dx=wx-b.x, dy=wy-b.y, d2=dx*dx+dy*dy;
+        const f=(b.r*b.r)/(d2+.001);
+        totalF+=f;
+        wR+=f*b.color[0]; wG+=f*b.color[1]; wB+=f*b.color[2];
+      }
+
+      let pr,pg,pb;
+      const THRESH = 1.0;
+
+      if (totalF >= THRESH) {
+        pr=Math.min(255,wR/totalF);
+        pg=Math.min(255,wG/totalF);
+        pb=Math.min(255,wB/totalF);
+      } else if (totalF >= THRESH*.5) {
+        const t=(totalF-THRESH*.5)/(THRESH*.5);
+        const et=t*t*(3-2*t);
+        const br=Math.min(255,wR/Math.max(totalF,.001));
+        const bg_=Math.min(255,wG/Math.max(totalF,.001));
+        const bb=Math.min(255,wB/Math.max(totalF,.001));
+        pr=BG[0]+(br-BG[0])*et;
+        pg=BG[1]+(bg_-BG[1])*et;
+        pb=BG[2]+(bb-BG[2])*et;
+      } else {
+        pr=BG[0]; pg=BG[1]; pb=BG[2];
+      }
+
+      for (let dy=0;dy<SCALE&&wy+dy<H;dy++) {
+        for (let dx=0;dx<SCALE&&wx+dx<W;dx++) {
+          const i=((wy+dy)*W+(wx+dx))*4;
+          data[i]=pr; data[i+1]=pg; data[i+2]=pb; data[i+3]=255;
+        }
+      }
+    }
+  }
+  ctx.putImageData(img,0,0);
+
+  // draw humidity circles as subtle glow
+  env.humidPoints.forEach(hp => {
+    const grad = ctx.createRadialGradient(hp.x,hp.y,0,hp.x,hp.y,hp.r*2.5);
+    grad.addColorStop(0,  `rgba(180,255,200,${hp.strength*.12})`);
+    grad.addColorStop(1,  'rgba(180,255,200,0)');
+    ctx.beginPath();
+    ctx.arc(hp.x,hp.y,hp.r*2.5,0,Math.PI*2);
+    ctx.fillStyle=grad;
+    ctx.fill();
+  });
+
+  // draw temperature aura around mouse
+  const tempGrad = ctx.createRadialGradient(env.mouseX,env.mouseY,0,env.mouseX,env.mouseY,Math.min(W,H)*.3);
+  tempGrad.addColorStop(0,  `rgba(255,140,60,${env.temp*.08})`);
+  tempGrad.addColorStop(1,  'rgba(255,140,60,0)');
+  ctx.beginPath();
+  ctx.arc(env.mouseX,env.mouseY,Math.min(W,H)*.3,0,Math.PI*2);
+  ctx.fillStyle=tempGrad;
+  ctx.fill();
+}
+
+// ── Mouse events ──
+document.addEventListener('mousemove', e => {
+  const dx = e.clientX - prevX, dy = e.clientY - prevY;
+  const spd = Math.sqrt(dx*dx+dy*dy);
+
+  env.mouseX = e.clientX; env.mouseY = e.clientY;
+  env.speedX = dx; env.speedY = dy;
+
+  // smooth wind
+  env.windX += (dx - env.windX)*.15;
+  env.windY += (dy - env.windY)*.15;
+  env.wind   = Math.min(1, spd/30);
+
+  prevX=e.clientX; prevY=e.clientY;
+
+  // cursor heat
+  cursorEl.style.left = e.clientX+'px';
+  cursorEl.style.top  = e.clientY+'px';
 });
 
-function clearState(){
-  particles=[];threads=[];colonies=[];pulses=[];trails=[];network=[];
-  stillTime=0;moved=false;frame=0;
-  cordAngle=0;cordX=W/2;cordY=H/2;cordInfection=0;
-}
+document.addEventListener('click', e => {
+  if (e.target.id==='reset-btn') return;
 
-function createThread(x,y){
-  return{x,y,angle:Math.random()*Math.PI*2,length:0,maxLen:50+Math.random()*150,
-    speed:0.9+Math.random()*1.3,width:0.25+Math.random()*0.7,alpha:0.25+Math.random()*0.4,
-    segments:[{x,y}],growing:true,branches:0,maxBranches:Math.floor(Math.random()*4),age:0};
-}
-
-function spawnExplosion(x,y){
-  playSFX('lyco');
-  for(let i=0;i<80;i++){
-    const a=Math.random()*Math.PI*2,sp=2+Math.random()*6;
-    particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:1+Math.random()*2.5,alpha:0.9,life:1,decay:0.012+Math.random()*0.018,spore:false});
-  }
-  for(let i=0;i<10;i++) pulses.push({x,y,r:0,maxR:60+Math.random()*80,alpha:0.5});
-}
-
-function initMucor(){
-  for(let i=0;i<20;i++) threads.push(createThread(W/2+(Math.random()-.5)*300,H/2+(Math.random()-.5)*300));
-  for(let i=0;i<70;i++) particles.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.2+0.2,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,alpha:Math.random()*.35+.07,spore:true});
-}
-function initLycoperdon(){
-  for(let i=0;i<50;i++) particles.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1+0.2,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3-.1,alpha:Math.random()*.3+.05,spore:true,life:1,decay:0});
-  for(let i=0;i<6;i++) network.push({x:Math.random()*W,y:Math.random()*H,r:15+Math.random()*30,pulse:Math.random()*Math.PI*2});
-}
-function initAspergillus(){
-  for(let i=0;i<60;i++) particles.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*.8+0.2,vx:(Math.random()-.5)*.15,vy:(Math.random()-.5)*.15,alpha:Math.random()*.2+.04,spore:true});
-}
-function initCordyceps(){
-  for(let i=0;i<50;i++) particles.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1+0.2,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2,alpha:Math.random()*.25+.05,spore:true});
-}
-function initBioluminescent(){
-  for(let i=0;i<120;i++) network.push({x:Math.random()*W,y:Math.random()*H,alpha:0,targetAlpha:0,r:.5+Math.random()*1.5,phase:Math.random()*Math.PI*2,connections:[]});
-  for(let i=0;i<network.length;i++){
-    for(let j=0;j<network.length;j++){
-      if(i===j) continue;
-      if(Math.hypot(network[i].x-network[j].x,network[i].y-network[j].y)<130) network[i].connections.push(j);
-    }
-    network[i].connections=network[i].connections.slice(0,4);
-  }
-}
-
-function launch(i){
-  clearState(); currentSpecies=i;
-  indexEl.classList.add('hidden');
-  backEl.classList.add('visible');
-  soundBtn.classList.add('visible');
-  speciesEl.classList.add('visible');
-  phaseEl.classList.add('visible');
-  hintEl.classList.add('visible');
-  snameEl.textContent=SPECIES[i].name;
-  sdescEl.textContent=SPECIES[i].desc;
-  hintEl.textContent=SPECIES[i].hint;
-  phaseEl.textContent='';
-  mouse={x:W/2,y:H/2}; prevMouse={x:W/2,y:H/2};
-  if(i===0) initMucor();
-  if(i===1) initLycoperdon();
-  if(i===2) initAspergillus();
-  if(i===3) initCordyceps();
-  if(i===4) initBioluminescent();
-  // sound 버튼 상태 반영
-  soundBtn.textContent=soundOn?'♪ sound off':'♪ sound on';
-  if(soundOn) startAmbient(i);
-}
-
-function goBack(){
-  currentSpecies=-1; clearState();
-  ctx.clearRect(0,0,W,H);
-  stopAmbient();
-  indexEl.classList.remove('hidden');
-  backEl.classList.remove('visible');
-  soundBtn.classList.remove('visible');
-  speciesEl.classList.remove('visible');
-  phaseEl.classList.remove('visible');
-  hintEl.classList.remove('visible');
-}
-
-// ─── DRAW ─────────────────────────────────────────────────
-function drawMucor(){
-  const dx=mouse.x-prevMouse.x,dy=mouse.y-prevMouse.y;
-  if(Math.hypot(dx,dy)<0.8) stillTime++; else stillTime=Math.max(0,stillTime-4);
-  prevMouse={...mouse};
-  let phase='sensing';
-  if(stillTime>100) phase='spreading';
-  if(stillTime>240) phase='consuming';
-  phaseEl.textContent=phase.toUpperCase();
-  ctx.fillStyle='rgba(0,0,0,0.07)'; ctx.fillRect(0,0,W,H);
-  particles.forEach(s=>{
-    s.x=(s.x+s.vx+W)%W; s.y=(s.y+s.vy+H)%H;
-    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(150,200,150,${s.alpha*.4})`; ctx.fill();
-  });
-  for(let i=pulses.length-1;i>=0;i--){
-    const p=pulses[i]; p.r+=1.8; p.alpha-=0.018;
-    if(p.alpha<=0){pulses.splice(i,1);continue;}
-    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.strokeStyle=`rgba(100,210,150,${p.alpha})`; ctx.lineWidth=0.5; ctx.stroke();
-  }
-  if(Math.random()<.3&&moved){
-    const t=createThread(mouse.x+(Math.random()-.5)*50,mouse.y+(Math.random()-.5)*50);
-    t.angle=Math.atan2(mouse.y-H/2,mouse.x-W/2)+(Math.random()-.5)*1.8;
-    threads.push(t); if(threads.length>160) threads.shift();
-    if(Math.random()<.12){
-      pulses.push({x:mouse.x,y:mouse.y,r:0,maxR:50,alpha:.4});
-      if(Math.random()<.15) playSFX('mucor');
-    }
-  }
-  moved=false;
-  for(let i=threads.length-1;i>=0;i--){
-    const t=threads[i];
-    if(!t.growing){t.age++;if(t.age>260)threads.splice(i,1);continue;}
-    const seg=t.segments[t.segments.length-1];
-    if(phase==='sensing'){
-      const toA=Math.atan2(mouse.y-seg.y,mouse.x-seg.x);
-      let diff=toA-t.angle; while(diff>Math.PI)diff-=Math.PI*2; while(diff<-Math.PI)diff+=Math.PI*2;
-      t.angle+=diff*.035+(Math.random()-.5)*.35;
-    } else {t.angle+=(Math.random()-.5)*.55;}
-    const nx=seg.x+Math.cos(t.angle)*t.speed,ny=seg.y+Math.sin(t.angle)*t.speed;
-    t.segments.push({x:nx,y:ny}); t.length+=t.speed;
-    const prev=t.segments[t.segments.length-2];
-    const col=phase==='sensing'?`rgba(90,200,140,${t.alpha})`:phase==='spreading'?`rgba(200,215,185,${t.alpha})`:`rgba(235,230,212,${t.alpha})`;
-    ctx.beginPath(); ctx.moveTo(prev.x,prev.y); ctx.lineTo(nx,ny);
-    ctx.strokeStyle=col; ctx.lineWidth=t.width; ctx.stroke();
-    if(t.length>t.maxLen*.55&&t.branches<t.maxBranches&&Math.random()<.018){
-      const b=createThread(seg.x,seg.y);
-      b.angle=t.angle+(Math.random()>.5?1:-1)*(.35+Math.random()*.7);
-      b.alpha=t.alpha*.65; b.width=t.width*.55; b.maxLen=t.maxLen*.6;
-      threads.push(b); t.branches++;
-    }
-    if(t.length>=t.maxLen){
-      t.growing=false;
-      if(phase!=='sensing'&&Math.random()<.28) colonies.push({x:seg.x,y:seg.y,r:0,maxR:70+Math.random()*100,speed:.4+Math.random()*.5,age:0});
-    }
-  }
-  for(let i=colonies.length-1;i>=0;i--){
-    const col=colonies[i]; col.age++; if(col.r<col.maxR) col.r+=col.speed;
-    const a=Math.min(.1,col.age*.0015);
-    const g=ctx.createRadialGradient(col.x,col.y,0,col.x,col.y,col.r);
-    g.addColorStop(0,`rgba(245,240,225,${a*2})`); g.addColorStop(1,`rgba(180,175,155,0)`);
-    ctx.beginPath(); ctx.arc(col.x,col.y,col.r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
-    if(col.age%15===0&&col.r<col.maxR*.85){const t=createThread(col.x,col.y);t.alpha=.4;t.width=.3;t.maxLen=30+Math.random()*60;threads.push(t);}
-    if(col.age>500) colonies.splice(i,1);
-  }
-  if(stillTime>120&&frame%28===0) colonies.push({x:mouse.x+(Math.random()-.5)*100,y:mouse.y+(Math.random()-.5)*100,r:0,maxR:80,speed:.4,age:0});
-  const cg=ctx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,20);
-  const cc=phase==='sensing'?'70,200,120':phase==='spreading'?'195,220,175':'245,240,218';
-  cg.addColorStop(0,`rgba(${cc},0.7)`); cg.addColorStop(1,`rgba(${cc},0)`);
-  ctx.beginPath(); ctx.arc(mouse.x,mouse.y,20,0,Math.PI*2); ctx.fillStyle=cg; ctx.fill();
-}
-
-function drawLycoperdon(){
-  ctx.fillStyle='rgba(0,0,0,0.06)'; ctx.fillRect(0,0,W,H);
-  for(let i=particles.length-1;i>=0;i--){
-    const p=particles[i];
-    if(p.spore){
-      p.x=(p.x+p.vx+W)%W; p.y=(p.y+p.vy+H)%H;
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(210,195,160,${p.alpha})`; ctx.fill();
-    } else {
-      p.x+=p.vx; p.y+=p.vy; p.vy+=0.04; p.vx*=0.99;
-      p.alpha-=p.decay;
-      if(p.alpha<=0){particles.splice(i,1);continue;}
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(230,210,160,${p.alpha})`; ctx.fill();
-    }
-  }
-  for(let i=pulses.length-1;i>=0;i--){
-    const p=pulses[i]; p.r+=3; p.alpha-=0.025;
-    if(p.alpha<=0){pulses.splice(i,1);continue;}
-    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.strokeStyle=`rgba(220,195,130,${p.alpha})`; ctx.lineWidth=0.5; ctx.stroke();
-  }
-  network.forEach(n=>{
-    n.pulse+=0.02;
-    const b=Math.sin(n.pulse)*.3+.7;
-    ctx.beginPath(); ctx.arc(n.x,n.y,n.r*b,0,Math.PI*2);
-    ctx.strokeStyle='rgba(180,155,100,0.12)'; ctx.lineWidth=0.5; ctx.stroke();
-  });
-  phaseEl.textContent='RELEASE';
-  const cg=ctx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,16);
-  cg.addColorStop(0,'rgba(230,210,160,0.7)'); cg.addColorStop(1,'rgba(230,210,160,0)');
-  ctx.beginPath(); ctx.arc(mouse.x,mouse.y,16,0,Math.PI*2); ctx.fillStyle=cg; ctx.fill();
-}
-
-function drawAspergillus(){
-  ctx.fillStyle='rgba(0,0,0,0.06)'; ctx.fillRect(0,0,W,H);
-  const dx=mouse.x-prevMouse.x,dy=mouse.y-prevMouse.y;
-  const spd=Math.hypot(dx,dy);
-  prevMouse={...mouse};
-  if(spd>2){
-    for(let i=0;i<8;i++){
-      const a=Math.atan2(dy,dx)+(i/8)*Math.PI*2+(Math.random()-.5)*.4;
-      const t=createThread(mouse.x,mouse.y);
-      t.angle=a; t.maxLen=20+Math.random()*60; t.speed=1.2+Math.random()*1.5;
-      t.width=0.3+Math.random()*.5; t.alpha=0.4+Math.random()*.3; t.maxBranches=1;
-      threads.push(t);
-      if(Math.random()<.04) playSFX('asp');
-    }
-    if(threads.length>400) threads.splice(0,threads.length-400);
-    phaseEl.textContent='RADIATING';
-  } else {phaseEl.textContent='WAITING';}
-  for(let i=threads.length-1;i>=0;i--){
-    const t=threads[i];
-    if(!t.growing){t.age++;if(t.age>180)threads.splice(i,1);continue;}
-    const seg=t.segments[t.segments.length-1];
-    t.angle+=(Math.random()-.5)*.25;
-    const nx=seg.x+Math.cos(t.angle)*t.speed,ny=seg.y+Math.sin(t.angle)*t.speed;
-    t.segments.push({x:nx,y:ny}); t.length+=t.speed;
-    const prev=t.segments[t.segments.length-2];
-    const prog=t.length/t.maxLen;
-    ctx.beginPath(); ctx.moveTo(prev.x,prev.y); ctx.lineTo(nx,ny);
-    ctx.strokeStyle=`rgba(${Math.round(160+prog*60)},${Math.round(100+prog*40)},${Math.round(220-prog*60)},${t.alpha*(1-prog*.5)})`;
-    ctx.lineWidth=t.width*(1-prog*.4); ctx.stroke();
-    if(t.length>t.maxLen*.5&&t.branches<t.maxBranches&&Math.random()<.04){
-      const b=createThread(seg.x,seg.y);
-      b.angle=t.angle+(Math.random()>.5?1:-1)*(.5+Math.random()*.5);
-      b.alpha=t.alpha*.6; b.width=t.width*.5; b.maxLen=t.maxLen*.5; b.maxBranches=0;
-      threads.push(b); t.branches++;
-    }
-    if(t.length>=t.maxLen) t.growing=false;
-  }
-  particles.forEach(s=>{
-    s.x=(s.x+s.vx+W)%W; s.y=(s.y+s.vy+H)%H;
-    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(180,120,240,${s.alpha*.3})`; ctx.fill();
-  });
-  const cg=ctx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,14);
-  cg.addColorStop(0,'rgba(180,120,240,0.6)'); cg.addColorStop(1,'rgba(180,120,240,0)');
-  ctx.beginPath(); ctx.arc(mouse.x,mouse.y,14,0,Math.PI*2); ctx.fillStyle=cg; ctx.fill();
-}
-
-let cordAngle=0,cordX=W/2,cordY=H/2,cordInfection=0;
-
-function drawCordyceps(){
-  ctx.fillStyle='rgba(0,0,0,0.055)'; ctx.fillRect(0,0,W,H);
-  const dx=mouse.x-prevMouse.x,dy=mouse.y-prevMouse.y;
-  const spd=Math.hypot(dx,dy);
-  prevMouse={...mouse};
-
-  if(spd>1) cordInfection=Math.min(1,cordInfection+0.0008);
-  cordAngle+=(Math.random()-.5)*0.04;
-
-  if(spd>1){
-    const intA=Math.atan2(dy,dx);
-    const bx=Math.cos(intA)*(1-cordInfection)+Math.cos(cordAngle)*cordInfection;
-    const by=Math.sin(intA)*(1-cordInfection)+Math.sin(cordAngle)*cordInfection;
-    const actA=Math.atan2(by,bx);
-    cordX=Math.max(0,Math.min(W,cordX+Math.cos(actA)*spd*0.6));
-    cordY=Math.max(0,Math.min(H,cordY+Math.sin(actA)*spd*0.6));
-    trails.push({x:cordX,y:cordY,alpha:.6,r:0,maxR:14+Math.random()*10,growing:true});
-    if(trails.length>400) trails.shift();
-    if(Math.random()<.04) playSFX('cord');
-  }
-
-  if(cordInfection<0.2) phaseEl.textContent='DORMANT';
-  else if(cordInfection<0.6) phaseEl.textContent='INFILTRATING';
-  else phaseEl.textContent='CONTROLLED';
-
-  for(let i=trails.length-1;i>=0;i--){
-    const t=trails[i];
-    if(t.growing&&t.r<t.maxR) t.r+=0.5; else t.growing=false;
-    t.alpha=Math.max(0,t.alpha-0.002);
-    if(t.alpha<=0){trails.splice(i,1);continue;}
-    ctx.beginPath(); ctx.arc(t.x,t.y,t.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(160,80,30,${t.alpha*0.3})`; ctx.fill();
-    ctx.strokeStyle=`rgba(200,110,50,${t.alpha*0.6})`; ctx.lineWidth=0.4; ctx.stroke();
-  }
-
-  if(spd>1&&cordInfection>0.05){
-    ctx.beginPath(); ctx.moveTo(mouse.x,mouse.y); ctx.lineTo(cordX,cordY);
-    ctx.strokeStyle=`rgba(200,100,50,${cordInfection*0.3})`; ctx.lineWidth=0.5;
-    ctx.setLineDash([3,6]); ctx.stroke(); ctx.setLineDash([]);
-  }
-
-  particles.forEach(s=>{
-    s.x=(s.x+s.vx+W)%W; s.y=(s.y+s.vy+H)%H;
-    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(160,80,40,${s.alpha*.25})`; ctx.fill();
+  // humidity burst at click
+  env.humidPoints.push({
+    x:e.clientX, y:e.clientY,
+    r:60+Math.random()*40,
+    strength:1.0,
   });
 
-  // user cursor (what they think they control)
-  const cg=ctx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,10);
-  cg.addColorStop(0,'rgba(220,200,180,0.5)'); cg.addColorStop(1,'rgba(220,200,180,0)');
-  ctx.beginPath(); ctx.arc(mouse.x,mouse.y,10,0,Math.PI*2); ctx.fillStyle=cg; ctx.fill();
+  // also spawn a small blob at click
+  const color = nextColor();
+  const r = 18+Math.random()*28;
+  blobs.push(new Blob(e.clientX, e.clientY, r, color));
 
-  // fungus cursor (where it's actually going)
-  const fg=ctx.createRadialGradient(cordX,cordY,0,cordX,cordY,14);
-  fg.addColorStop(0,`rgba(210,100,40,${0.4+cordInfection*0.4})`); fg.addColorStop(1,'rgba(210,100,40,0)');
-  ctx.beginPath(); ctx.arc(cordX,cordY,14,0,Math.PI*2); ctx.fillStyle=fg; ctx.fill();
+  // satellite blobs
+  const n = 1+Math.floor(Math.random()*3);
+  for (let i=0;i<n;i++) {
+    const a=(i/n)*Math.PI*2+Math.random();
+    const d=r*(1+Math.random()*.8);
+    const sr=r*(.2+Math.random()*.4);
+    const b=new Blob(e.clientX+Math.cos(a)*d, e.clientY+Math.sin(a)*d, sr, color);
+    b.baseR=sr;
+    blobs.push(b);
+  }
+});
+
+window.resetAll = () => {
+  blobs=[]; env.humidPoints=[]; colorIdx=0;
+  env.humid=0; env.temp=0; env.wind=0;
+};
+
+// ── Loop ──
+let frame=0;
+function loop() {
+  frame++;
+
+  // decay wind
+  env.windX *= .9; env.windY *= .9;
+  env.wind  *= .95;
+
+  // update humidity points (decay strength)
+  env.humidPoints = env.humidPoints
+    .map(hp=>({...hp, strength:hp.strength*.992}))
+    .filter(hp=>hp.strength>.02);
+  env.humid = Math.min(1, env.humidPoints.reduce((s,hp)=>s+hp.strength,0)/3);
+
+  // update temp (based on blobs near mouse)
+  const nearCount = blobs.filter(b=>{
+    const dx=b.x-env.mouseX,dy=b.y-env.mouseY;
+    return Math.sqrt(dx*dx+dy*dy)<Math.min(W,H)*.35;
+  }).length;
+  env.temp = Math.min(1, nearCount/8 + (1-Math.min(1,
+    blobs.reduce((mn,b)=>{
+      const dx=b.x-env.mouseX,dy=b.y-env.mouseY;
+      return Math.min(mn,Math.sqrt(dx*dx+dy*dy));
+    }, Infinity)/(Math.min(W,H)*.45)
+  ))*.6);
+
+  // update blobs
+  blobs = blobs.filter(b=>b.r>2);
+  blobs.forEach(b=>b.update());
+
+  render();
+
+  // HUD
+  barTemp.style.width  = (env.temp*100)+'%';
+  barWind.style.width  = (env.wind*100)+'%';
+  barHumid.style.width = (env.humid*100)+'%';
+
+  // cursor visual
+  if (env.temp>.5) cursorEl.classList.add('hot');
+  else cursorEl.classList.remove('hot');
+
+  requestAnimationFrame(loop);
 }
 
-function drawBioluminescent(){
-  ctx.fillStyle='rgba(0,0,0,0.1)'; ctx.fillRect(0,0,W,H);
-  const mdist=120; let anyGlowing=false;
-  network.forEach(n=>{
-    const d=Math.hypot(n.x-mouse.x,n.y-mouse.y);
-    n.targetAlpha=d<mdist?Math.pow(1-d/mdist,1.5)*.9:0;
-    const wasLow=n.alpha<.05;
-    n.alpha+=(n.targetAlpha-n.alpha)*.04;
-    n.phase+=0.025;
-    if(n.alpha>.05&&wasLow&&Math.random()<.25) playSFX('pane');
-    if(n.alpha>.01){
-      anyGlowing=true;
-      const breathe=Math.sin(n.phase)*.15+.85;
-      const g=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r*6*breathe);
-      g.addColorStop(0,`rgba(80,220,140,${n.alpha*.7})`);
-      g.addColorStop(.4,`rgba(40,180,100,${n.alpha*.3})`);
-      g.addColorStop(1,'rgba(20,120,70,0)');
-      ctx.beginPath(); ctx.arc(n.x,n.y,n.r*6*breathe,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
-      ctx.beginPath(); ctx.arc(n.x,n.y,n.r*breathe,0,Math.PI*2);
-      ctx.fillStyle=`rgba(160,255,180,${n.alpha})`; ctx.fill();
-      (n.connections||[]).forEach(j=>{
-        const nb=network[j];
-        if(nb.alpha>.01){
-          ctx.beginPath(); ctx.moveTo(n.x,n.y); ctx.lineTo(nb.x,nb.y);
-          ctx.strokeStyle=`rgba(60,200,110,${Math.min(n.alpha,nb.alpha)*.4})`; ctx.lineWidth=.4; ctx.stroke();
-        }
-      });
-    }
-  });
-  phaseEl.textContent=anyGlowing?'GLOWING':'DARK';
-  ctx.beginPath(); ctx.arc(mouse.x,mouse.y,3,0,Math.PI*2);
-  ctx.fillStyle='rgba(120,255,160,0.6)'; ctx.fill();
-}
-
-function loop(){
-  requestAnimationFrame(loop); frame++;
-  if(currentSpecies<0) return;
-  if(currentSpecies===0) drawMucor();
-  if(currentSpecies===1) drawLycoperdon();
-  if(currentSpecies===2) drawAspergillus();
-  if(currentSpecies===3) drawCordyceps();
-  if(currentSpecies===4) drawBioluminescent();
-}
 loop();
+
+window.addEventListener('resize',()=>{
+  W=canvas.width=window.innerWidth;
+  H=canvas.height=window.innerHeight;
+  sw=Math.ceil(W/SCALE); sh=Math.ceil(H/SCALE);
+});
 </script>
 </body>
 </html>
