@@ -5,7 +5,7 @@
 <title>Test 2 — Fission</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #7a7a7a; width: 100vw; height: 100vh; overflow: hidden; cursor: none; }
+  body { background: #7a7a7a; transition: background 0.3s; width: 100vw; height: 100vh; overflow: hidden; cursor: none; }
   canvas { display: block; position: fixed; inset: 0; }
 
   /* Environment HUD */
@@ -31,7 +31,7 @@
     transition: width 0.3s ease;
   }
   #bar-temp { background: rgba(255,160,80,0.7); }
-  #bar-wind { background: rgba(160,220,255,0.7); }
+  #bar-wind { background: rgba(255,240,100,0.8); }
   #bar-humid { background: rgba(180,255,180,0.7); }
 
   #title {
@@ -77,7 +77,7 @@
     <div class="env-bar-wrap"><div class="env-bar" id="bar-temp" style="width:0%"></div></div>
   </div>
   <div class="env-var">
-    <div class="env-label">Wind</div>
+    <div class="env-label">Light</div>
     <div class="env-bar-wrap"><div class="env-bar" id="bar-wind" style="width:0%"></div></div>
   </div>
   <div class="env-var">
@@ -101,12 +101,21 @@ const barHumid   = document.getElementById('bar-humid');
 const env = {
   mouseX: W/2, mouseY: H/2,
   speedX: 0,   speedY: 0,
-  windX:  0,   windY:  0,   // smoothed wind
   temp:   0,   // 0–1, based on proximity to blobs
-  wind:   0,   // 0–1, mouse speed
+  light:  1,   // 1=bright, 0=dark (space key)
+  lightTarget: 1,
+  wind:   0,   // kept for bar compat
   humid:  0,   // 0–1, decays over time, boosted by click
   humidPoints: [], // [{x,y,r,strength}] moisture spots
 };
+
+let spaceDown = false;
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); spaceDown = true; }
+});
+document.addEventListener('keyup', e => {
+  if (e.code === 'Space') spaceDown = false;
+});
 
 let prevX = W/2, prevY = H/2;
 
@@ -145,13 +154,12 @@ class Blob {
     const proximity   = Math.max(0, 1 - distToMouse / (Math.min(W,H)*0.45));
     const tempEffect  = 0.4 + proximity * 2.2; // 0.4 cold → 2.6 hot
 
-    // ── Wind: push blobs in mouse movement direction ──
-    this.vx += env.windX * 0.012;
-    this.vy += env.windY * 0.012;
+    // ── Light: darkness activates blobs (mold thrives without light) ──
+    const darkBoost = 1 + (1 - env.light) * 2.8;
 
-    // ── Base drift (scaled by temperature) ──
-    this.vx += (Math.random()-.5) * 0.04 * tempEffect;
-    this.vy += (Math.random()-.5) * 0.04 * tempEffect;
+    // ── Base drift (scaled by temperature + light) ──
+    this.vx += (Math.random()-.5) * 0.04 * tempEffect * darkBoost;
+    this.vy += (Math.random()-.5) * 0.04 * tempEffect * darkBoost;
     this.vx *= (0.97 - proximity * 0.02); // more active = less damping
     this.vy *= (0.97 - proximity * 0.02);
 
@@ -180,8 +188,9 @@ class Blob {
     if (this.y<pad)     { this.y=pad;      this.vy= Math.abs(this.vy)*.6; }
     if (this.y>H-pad)   { this.y=H-pad;   this.vy=-Math.abs(this.vy)*.6; }
 
-    // split if very hot + large
-    if (proximity > 0.7 && this.r > 90 && Math.random() < 0.004 * proximity) {
+    // split if very hot + large, or if dark + large
+    const splitChance = 0.004 * proximity + (1 - env.light) * 0.003;
+    if (this.r > 80 && Math.random() < splitChance) {
       this.split();
     }
   }
@@ -284,9 +293,7 @@ document.addEventListener('mousemove', e => {
   env.speedX = dx; env.speedY = dy;
 
   // smooth wind
-  env.windX += (dx - env.windX)*.15;
-  env.windY += (dy - env.windY)*.15;
-  env.wind   = Math.min(1, spd/30);
+  // (wind removed — light is now the second variable)
 
   prevX=e.clientX; prevY=e.clientY;
 
@@ -332,9 +339,10 @@ let frame=0;
 function loop() {
   frame++;
 
-  // decay wind
-  env.windX *= .9; env.windY *= .9;
-  env.wind  *= .95;
+  // light update — space = darkness
+  env.lightTarget = spaceDown ? 0 : 1;
+  env.light += (env.lightTarget - env.light) * 0.06;
+  env.wind = 1 - env.light; // reuse wind bar for light indicator
 
   // update humidity points (decay strength)
   env.humidPoints = env.humidPoints
@@ -362,7 +370,7 @@ function loop() {
 
   // HUD
   barTemp.style.width  = (env.temp*100)+'%';
-  barWind.style.width  = (env.wind*100)+'%';
+  barWind.style.width  = ((1-env.light)*100)+'%';
   barHumid.style.width = (env.humid*100)+'%';
 
   // cursor visual
