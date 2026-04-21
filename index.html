@@ -82,10 +82,6 @@
     color: var(--ink);
   }
 
-  .nav-links a.active::before {
-    content: '→ ';
-  }
-
   /* ── PAGES ── */
   .page {
     position: fixed;
@@ -115,18 +111,10 @@
     letter-spacing: 0.08em;
     color: var(--mid);
     margin-bottom: 32px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    
   }
 
   .page-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: rgba(26,26,24,0.12);
-    max-width: 240px;
+    display: none;
   }
 
   .page-empty {
