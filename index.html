@@ -167,28 +167,84 @@
     z-index: 10; pointer-events: none;
   }
 
+  #page-experimentation #hud {
+    position: absolute;
+    bottom: 48px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 48px; align-items: flex-end;
+    z-index: 10; pointer-events: none;
+    background: rgba(242,240,235,0.85);
+    backdrop-filter: blur(8px);
+    padding: 16px 32px;
+    border-radius: 4px;
+    border: 1px solid rgba(26,26,24,0.08);
+  }
+
   .env-var {
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
   }
   .env-label {
-    font-size: 9px;
+    font-size: 11px;
     letter-spacing: 0.12em;
-    color: rgba(26,26,24,0.3);
-    
+    color: rgba(26,26,24,0.5);
+    text-transform: uppercase;
   }
   .env-bar-wrap {
-    width: 60px; height: 2px; background: rgba(26,26,24,0.1);
-    border-radius: 2px; overflow: hidden;
+    width: 120px; height: 5px; background: rgba(26,26,24,0.12);
+    border-radius: 3px; overflow: visible; position: relative;
   }
   .env-bar {
-    height: 100%; border-radius: 2px;
-    transition: width 0.3s ease;
+    height: 100%; border-radius: 3px;
+    transition: width 0.2s ease;
   }
-  #bar-temp  { background: rgba(255,120,40,0.7); }
-  #bar-wind  { background: rgba(220,200,120,0.7); }
-  #bar-humid { background: rgba(80,200,180,0.7); }
+  #bar-temp  { background: rgba(255,120,40,0.8); }
+  #bar-wind  { background: rgba(220,200,120,0.8); }
+  #bar-humid { background: rgba(80,200,180,0.8); }
 
-  #reset-btn {
+  #help-btn {
+    position: absolute; bottom: 36px; right: 36px;
+    font-family: 'IM Fell English', serif;
+    font-size: 13px;
+    color: rgba(26,26,24,0.35); background: none;
+    border: 1px solid rgba(26,26,24,0.15);
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    cursor: pointer; transition: all 0.2s; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #help-btn:hover { color: var(--ink); border-color: rgba(26,26,24,0.4); }
+
+  #help-panel {
+    position: absolute; bottom: 72px; right: 36px;
+    background: var(--bg);
+    border: 1px solid rgba(26,26,24,0.12);
+    padding: 20px 24px;
+    width: 300px;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+  }
+  #help-panel.visible { display: flex; }
+
+  .help-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(26,26,24,0.08);
+  }
+  .help-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .help-key {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--mid);
+    text-transform: uppercase;
+  }
+  .help-desc {
+    font-size: 12px;
+    color: var(--ink);
+    line-height: 1.6;
+  }
     position: absolute; top: 88px; right: 36px;
     font-family: 'IM Fell English', serif;
     
@@ -652,8 +708,14 @@
   </div>
   <div id="hud">
     <div class="env-var">
-      <div class="env-label">Temperature</div>
-      <div class="env-bar-wrap"><div class="env-bar" id="bar-temp" style="width:0%"></div></div>
+      <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:0;">
+        <div class="env-label">Temperature</div>
+        <span id="temp-label" style="font-size:13px;color:rgba(26,26,24,0.5);letter-spacing:0.02em;">15°C</span>
+      </div>
+      <div class="env-bar-wrap" style="position:relative;">
+        <div class="env-bar" id="bar-temp" style="width:0%"></div>
+        <div style="position:absolute;top:-6px;left:29%;width:28%;height:15px;border-left:1px solid rgba(26,26,24,0.3);border-right:1px solid rgba(26,26,24,0.3);"></div>
+      </div>
     </div>
     <div class="env-var">
       <div class="env-label">Darkness</div>
@@ -665,6 +727,23 @@
     </div>
   </div>
   <button id="reset-btn" onclick="resetAll()">Clear</button>
+
+  <!-- Help button -->
+  <button id="help-btn" onclick="toggleHelp()">?</button>
+  <div id="help-panel">
+    <div class="help-row">
+      <span class="help-key">Hold Click</span>
+      <span class="help-desc">Apply heat — optimal range is 20–30°C. Below that, mold activates. Above 37°C, the colony begins to die.</span>
+    </div>
+    <div class="help-row">
+      <span class="help-key">Space</span>
+      <span class="help-desc">Toggle darkness — mold moves more aggressively without light.</span>
+    </div>
+    <div class="help-row">
+      <span class="help-key">⌘ + Click</span>
+      <span class="help-desc">Supply moisture — new colonies emerge near humid zones.</span>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -723,7 +802,7 @@ const env = {
   mouseX: 400, mouseY: 300,
   speedX: 0, speedY: 0,
   mouseHumid: 0,
-  globalTemp: 0,
+  globalTemp: 0.14, // 시작 온도 ~15°C
   light: 1, lightTarget: 1,
   wind: 0,
   humid: 0,
@@ -757,7 +836,7 @@ let blobs = [];
 class Blob {
   constructor(x,y,r,color){
     this.x=x; this.y=y; this.r=r;
-    this.baseR=r; this.color=color;
+    this.baseR=r; this.maxR=r; this.color=color;
     this.vx=(Math.random()-.5)*.8;
     this.vy=(Math.random()-.5)*.8;
     this.wobble=Math.random()*Math.PI*2;
@@ -795,9 +874,11 @@ class Blob {
     this.vx += (Math.random()-.5) * 0.015 * tempBoost;
     this.vy += (Math.random()-.5) * 0.015 * tempBoost;
 
-    // 과열 → 블롭 서서히 줄어듦
+    // 과열 → 블롭 서서히 줄어듦, 적정 복귀 시 회복
     if(t > 0.75) {
       this.baseR = Math.max(2, this.baseR - (t - 0.75) * 0.3);
+    } else if(t < 0.65 && this.baseR < this.maxR) {
+      this.baseR = Math.min(this.maxR, this.baseR + 0.08);
     }
     // repulsion from other blobs
     for(const other of blobs){
@@ -993,18 +1074,23 @@ function tryBud() {
     const newR = 8 + Math.random() * 28;
     const bud  = new Blob(spawnX, spawnY, 3, nextColor());
     bud.baseR  = newR;
+    bud.maxR   = newR;
     bud.vx     = (Math.random()-.5)*0.8;
     bud.vy     = (Math.random()-.5)*0.8;
     blobs.push(bud);
   }
 }
 
+window.toggleHelp = () => {
+  document.getElementById('help-panel').classList.toggle('visible');
+};
+
 window.resetAll=()=>{
   blobs=[new Blob(W/2, H/2, 28, nextColor())];
   colorIdx=1;
   env.humidPoints=[]; env.heatPoints=[];
   clickFlashes=[]; humidFlashes=[];
-  env.humid=0; env.mouseHumid=0; env.wind=0; env.globalTemp=0;
+  env.humid=0; env.mouseHumid=0; env.wind=0; env.globalTemp=0.14;
 };
 
 let frame=0;
@@ -1017,7 +1103,7 @@ function loop(){
   if(mouseDown) {
     env.globalTemp = Math.min(1, env.globalTemp + 0.004);
   } else {
-    env.globalTemp = Math.max(0, env.globalTemp - 0.006);
+    env.globalTemp = Math.max(0.14, env.globalTemp - 0.005); // 15°C baseline
   }
 
   // flash only when temp is actively rising
@@ -1045,6 +1131,9 @@ function loop(){
   const tempColor = heat < 0.5
     ? `rgba(${Math.floor(heat*2*200)},${180},80,0.8)`
     : `rgba(220,${Math.floor((1-heat)*2*180)},40,0.8)`;
+  const tempC = Math.round(10 + env.globalTemp * 35); // 0~1 → 10~45°C
+  const tempLabel = document.getElementById('temp-label');
+  if(tempLabel) tempLabel.textContent = tempC + '°C';
   barTemp.style.width=(heat*100)+'%';
   barTemp.style.background = tempColor;
   barWind.style.width=((1-env.light)*100)+'%';
