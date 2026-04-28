@@ -24,7 +24,6 @@
     background: var(--bg);
     color: var(--ink);
     font-family: 'IM Fell English', serif;
-    
     overflow: hidden;
   }
 
@@ -47,7 +46,6 @@
     margin-right: 48px;
     white-space: nowrap;
     flex-shrink: 0;
-    
   }
 
   .nav-links {
@@ -73,7 +71,6 @@
     cursor: pointer;
     transition: color 0.2s;
     white-space: nowrap;
-    
   }
 
   .nav-links a:hover,
@@ -130,7 +127,6 @@
 
   .page-empty span {
     font-family: 'IM Fell English', serif;
-    
     font-size: 13px;
     color: rgba(26,26,24,0.2);
     letter-spacing: 0.04em;
@@ -159,14 +155,7 @@
     height: 100%;
   }
 
-  /* HUD & controls from fission — positioned relative to page */
-  #page-Experimentation #hud {
-    position: absolute;
-    bottom: 48px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 32px; align-items: flex-end;
-    z-index: 10; pointer-events: none;
-  }
-
+  /* HUD */
   #page-Experimentation #hud {
     position: absolute;
     bottom: 48px; left: 50%; transform: translateX(-50%);
@@ -200,39 +189,31 @@
   #bar-wind  { background: rgba(220,200,120,0.8); }
   #bar-humid { background: rgba(80,200,180,0.8); }
 
-  #help-btn {
-    position: absolute; bottom: 36px; right: 36px;
-    font-family: 'IM Fell English', serif;
-    font-size: 13px;
-    color: rgba(26,26,24,0.35); background: none;
-    border: 1px solid rgba(26,26,24,0.15);
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    cursor: pointer; transition: all 0.2s; z-index: 10;
-    display: flex; align-items: center; justify-content: center;
-  }
-  #help-btn:hover { color: var(--ink); border-color: rgba(26,26,24,0.4); }
-
+  /* ── HELP PANEL — always visible, fixed right ── */
   #help-panel {
-    position: absolute; bottom: 72px; right: 36px;
-    background: var(--bg);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 36px;
+    background: rgba(242,240,235,0.92);
+    backdrop-filter: blur(8px);
     border: 1px solid rgba(26,26,24,0.12);
     padding: 20px 24px;
-    width: 300px;
+    width: 260px;
     z-index: 10;
-    display: none;
+    display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 0;
   }
-  #help-panel.visible { display: flex; }
 
   .help-row {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding-bottom: 16px;
+    padding: 14px 0;
     border-bottom: 1px solid rgba(26,26,24,0.08);
   }
+  .help-row:first-child { padding-top: 0; }
   .help-row:last-child { border-bottom: none; padding-bottom: 0; }
   .help-key {
     font-size: 10px;
@@ -245,9 +226,10 @@
     color: var(--ink);
     line-height: 1.6;
   }
+
+  #reset-btn {
     position: absolute; top: 88px; right: 36px;
     font-family: 'IM Fell English', serif;
-    
     font-size: 11px;
     letter-spacing: 0.08em;
     color: rgba(26,26,24,0.3); background: none;
@@ -256,7 +238,7 @@
   }
   #reset-btn:hover { color: var(--ink); border-color: rgba(26,26,24,0.4); }
 
-  /* custom cursor — only on Experimentation page */
+  /* ── scroll pages ── */
   .page-inner--scroll {
     overflow-y: auto;
     height: 100%;
@@ -289,7 +271,6 @@
     max-width: 560px;
   }
 
-  /* Respond cards */
   .respond-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -316,7 +297,6 @@
     background: var(--bg);
   }
 
-  /* Communication */
   .comm-layout {
     display: flex;
     align-items: center;
@@ -378,7 +358,6 @@
     line-height: 1.5;
   }
 
-  /* Findings */
   .findings-grid {
     display: flex;
     gap: 24px;
@@ -521,6 +500,9 @@
     line-height: 1.5;
     letter-spacing: 0.01em;
   }
+
+  /* cursor */
+  #cursor {
     position: fixed; pointer-events: none; z-index: 200;
     width: 12px; height: 12px;
     border: 1px solid rgba(26,26,24,0.4);
@@ -555,7 +537,6 @@
   <div class="page-inner page-inner--scroll">
     <div class="page-label">00 — About Mold</div>
 
-    <!-- Section 1: Respond -->
     <div class="about-section">
       <div class="about-header">
         <div class="about-title">Respond</div>
@@ -589,7 +570,6 @@
       </div>
     </div>
 
-    <!-- Section 2: Movement & Communication -->
     <div class="about-section">
       <div class="about-header">
         <div class="about-title">Movement<br>& Communication</div>
@@ -618,7 +598,6 @@
       </div>
     </div>
 
-    <!-- Section 3: Compelling Findings -->
     <div class="about-section">
       <div class="about-header">
         <div class="about-title">Compelling Findings</div>
@@ -706,6 +685,7 @@
   <div id="exp-canvas-wrap">
     <canvas id="c"></canvas>
   </div>
+
   <div id="hud">
     <div class="env-var">
       <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:0;">
@@ -726,10 +706,10 @@
       <div class="env-bar-wrap"><div class="env-bar" id="bar-humid" style="width:0%"></div></div>
     </div>
   </div>
+
   <button id="reset-btn" onclick="resetAll()">Clear</button>
 
-  <!-- Help button -->
-  <button id="help-btn" onclick="toggleHelp()">?</button>
+  <!-- Help panel — always visible -->
   <div id="help-panel">
     <div class="help-row">
       <span class="help-key">Hold Click</span>
@@ -748,7 +728,7 @@
 
 <script>
 // ── NAVIGATION ──
-const pages   = document.querySelectorAll('.page');
+const pages    = document.querySelectorAll('.page');
 const navLinks = document.querySelectorAll('.nav-links a');
 const cursorEl = document.getElementById('cursor');
 
@@ -762,7 +742,6 @@ function showPage(id) {
   const link = document.querySelector(`[data-page="${id}"]`);
   if (link) link.classList.add('active');
 
-  // show custom cursor only on Experimentation
   if (id === 'Experimentation') {
     cursorEl.style.display = 'block';
     resizeCanvas();
@@ -797,12 +776,11 @@ const barTemp  = document.getElementById('bar-temp');
 const barWind  = document.getElementById('bar-wind');
 const barHumid = document.getElementById('bar-humid');
 
-// ── Environment state ──
 const env = {
   mouseX: 400, mouseY: 300,
   speedX: 0, speedY: 0,
   mouseHumid: 0,
-  globalTemp: 0.43, // 시작 온도 ~15°C
+  globalTemp: 0.43,
   light: 1, lightTarget: 1,
   wind: 0,
   humid: 0,
@@ -823,7 +801,6 @@ document.addEventListener('keyup', e => {
 
 let prevX=400, prevY=300;
 
-// ── Palette — warmer to match site tone ──
 const COLORS = [
   [232,120,152],[240,128,80],[200,136,216],
   [240,100,100],[216,160,216],[245,160,100],
@@ -853,8 +830,8 @@ class Blob {
     const darkBoost=1+(1-env.light)*12.0;
     this.vx+=(Math.random()-.5)*.008*humidEffect*darkBoost;
     this.vy+=(Math.random()-.5)*.008*humidEffect*darkBoost;
-    this.vx*=(0.92 - (1-env.light)*0.05);
-    this.vy*=(0.92 - (1-env.light)*0.05);
+    this.vx*=(0.92-(1-env.light)*0.05);
+    this.vy*=(0.92-(1-env.light)*0.05);
     this.x+=this.vx+Math.sin(this.wobble)*.04*humidEffect*darkBoost;
     this.y+=this.vy+Math.cos(this.wobble*.75)*.04*humidEffect*darkBoost;
     env.humidPoints.forEach(hp=>{
@@ -866,21 +843,18 @@ class Blob {
         this.vy-=(hdy/(hd+1))*inf*.18;
       }
     });
-    // temperature effect on movement and survival
     const t = env.globalTemp;
     const tempBoost = t < 0.65
-      ? 1 + t * 2.5          // 적정 온도 → 활발
-      : 1 + (1-t) * 1.5;     // 과열 → 다시 느려짐
+      ? 1 + t * 2.5
+      : 1 + (1-t) * 1.5;
     this.vx += (Math.random()-.5) * 0.015 * tempBoost;
     this.vy += (Math.random()-.5) * 0.015 * tempBoost;
 
-    // 과열 → 블롭 서서히 줄어듦, 적정 복귀 시 회복
     if(t > 0.75) {
-      this.baseR = Math.max(2, this.baseR - (t - 0.75) * 0.3);
+      this.baseR = Math.max(2, this.baseR - (t-0.75)*0.3);
     } else if(t < 0.65 && this.baseR < this.maxR) {
       this.baseR = Math.min(this.maxR, this.baseR + 0.08);
     }
-    // repulsion from other blobs
     for(const other of blobs){
       if(other===this) continue;
       const rdx=this.x-other.x, rdy=this.y-other.y;
@@ -920,7 +894,6 @@ class Blob {
   }
 }
 
-// BG matches site — warm off-white
 const BG=[242,240,235];
 
 function render(){
@@ -971,33 +944,28 @@ function render(){
     ctx.arc(hp.x,hp.y,hp.r*2.5,0,Math.PI*2);
     ctx.fillStyle=grad; ctx.fill();
   });
-  // orange heat flashes — click
   clickFlashes.forEach(cf=>{
-    const r = 180 * cf.strength;
-    const grad = ctx.createRadialGradient(cf.x,cf.y,0,cf.x,cf.y,r);
-    grad.addColorStop(0, `rgba(255,120,40,${cf.strength*0.55})`);
-    grad.addColorStop(0.4, `rgba(255,160,60,${cf.strength*0.25})`);
-    grad.addColorStop(1, 'rgba(255,120,40,0)');
+    const r=180*cf.strength;
+    const grad=ctx.createRadialGradient(cf.x,cf.y,0,cf.x,cf.y,r);
+    grad.addColorStop(0,`rgba(255,120,40,${cf.strength*0.55})`);
+    grad.addColorStop(0.4,`rgba(255,160,60,${cf.strength*0.25})`);
+    grad.addColorStop(1,'rgba(255,120,40,0)');
     ctx.beginPath(); ctx.arc(cf.x,cf.y,r,0,Math.PI*2);
     ctx.fillStyle=grad; ctx.fill();
   });
-
-  // blue/green humid flashes — cmd
   humidFlashes.forEach(cf=>{
-    const r = 160 * cf.strength;
-    const grad = ctx.createRadialGradient(cf.x,cf.y,0,cf.x,cf.y,r);
-    grad.addColorStop(0, `rgba(80,200,180,${cf.strength*0.45})`);
-    grad.addColorStop(0.4, `rgba(60,180,140,${cf.strength*0.2})`);
-    grad.addColorStop(1, 'rgba(80,200,180,0)');
+    const r=160*cf.strength;
+    const grad=ctx.createRadialGradient(cf.x,cf.y,0,cf.x,cf.y,r);
+    grad.addColorStop(0,`rgba(80,200,180,${cf.strength*0.45})`);
+    grad.addColorStop(0.4,`rgba(60,180,140,${cf.strength*0.2})`);
+    grad.addColorStop(1,'rgba(80,200,180,0)');
     ctx.beginPath(); ctx.arc(cf.x,cf.y,r,0,Math.PI*2);
     ctx.fillStyle=grad; ctx.fill();
   });
-
-  // darkness overlay — space key
-  const darkness = 1 - env.light;
-  if (darkness > 0.01) {
-    ctx.fillStyle = `rgba(10,8,6,${darkness * 0.82})`;
-    ctx.fillRect(0, 0, W, H);
+  const darkness=1-env.light;
+  if(darkness>0.01){
+    ctx.fillStyle=`rgba(10,8,6,${darkness*0.82})`;
+    ctx.fillRect(0,0,W,H);
   }
 }
 
@@ -1010,83 +978,68 @@ document.addEventListener('mousemove', e=>{
   cursorEl.style.top=e.clientY+'px';
 });
 
-let clickFlashes  = [];
-let humidFlashes  = [];
-
-let mouseDown = false;
+let clickFlashes=[];
+let humidFlashes=[];
+let mouseDown=false;
 
 document.addEventListener('mousedown', e=>{
   if(e.target.id==='reset-btn') return;
   const activePage=document.querySelector('.page.active');
   if(!activePage||activePage.id!=='page-Experimentation') return;
-  if(e.metaKey||e.ctrlKey) return; // cmd is humidity
-  mouseDown = true;
+  if(e.metaKey||e.ctrlKey) return;
+  mouseDown=true;
 });
 
-document.addEventListener('mouseup', ()=>{ mouseDown = false; });
+document.addEventListener('mouseup', ()=>{ mouseDown=false; });
 
 document.addEventListener('click', e=>{
   if(e.target.id==='reset-btn') return;
   const activePage=document.querySelector('.page.active');
   if(!activePage||activePage.id!=='page-Experimentation') return;
-  // cmd/ctrl + click → humidity
-  if(e.metaKey||e.ctrlKey) {
-    humidFlashes.push({ x:e.clientX, y:e.clientY, strength:1.0 });
+  if(e.metaKey||e.ctrlKey){
+    humidFlashes.push({x:e.clientX,y:e.clientY,strength:1.0});
     env.humidPoints.push({x:e.clientX,y:e.clientY,r:60+Math.random()*40,strength:1.0});
   }
 });
 
-// ── Natural budding: environment-driven reproduction ──
-function tryBud() {
-  if (blobs.length === 0) return;
-  if (blobs.length > 20) return;
-
-  const base       = 0.0007;
-  const humidBoost = env.humid * 0.008;
-  const chance     = base + humidBoost;
-
-  if (Math.random() < chance) {
+function tryBud(){
+  if(blobs.length===0) return;
+  if(blobs.length>20) return;
+  const base=0.0007;
+  const humidBoost=env.humid*0.008;
+  const chance=base+humidBoost;
+  if(Math.random()<chance){
     let spawnX, spawnY;
-    const r = Math.random();
-
-    if (r < 0.4 && env.humidPoints.length > 0) {
-      // 40% — near a humidity point (new territory)
-      const total = env.humidPoints.reduce((s,hp)=>s+hp.strength,0);
-      let pick = Math.random()*total, chosen = env.humidPoints[0];
+    const r=Math.random();
+    if(r<0.4&&env.humidPoints.length>0){
+      const total=env.humidPoints.reduce((s,hp)=>s+hp.strength,0);
+      let pick=Math.random()*total, chosen=env.humidPoints[0];
       for(const hp of env.humidPoints){ pick-=hp.strength; if(pick<=0){chosen=hp;break;} }
-      const a = Math.random()*Math.PI*2;
-      const d = 20 + Math.random()*chosen.r*1.5;
-      spawnX = chosen.x + Math.cos(a)*d;
-      spawnY = chosen.y + Math.sin(a)*d;
-    } else if (r < 0.75) {
-      // 35% — attached to existing blob (merges/clusters)
-      const parent = blobs[Math.floor(Math.random()*blobs.length)];
-      const a = Math.random()*Math.PI*2;
-      const d = parent.r * (0.5 + Math.random()*0.8);
-      spawnX = parent.x + Math.cos(a)*d;
-      spawnY = parent.y + Math.sin(a)*d;
+      const a=Math.random()*Math.PI*2;
+      const d=20+Math.random()*chosen.r*1.5;
+      spawnX=chosen.x+Math.cos(a)*d;
+      spawnY=chosen.y+Math.sin(a)*d;
+    } else if(r<0.75){
+      const parent=blobs[Math.floor(Math.random()*blobs.length)];
+      const a=Math.random()*Math.PI*2;
+      const d=parent.r*(0.5+Math.random()*0.8);
+      spawnX=parent.x+Math.cos(a)*d;
+      spawnY=parent.y+Math.sin(a)*d;
     } else {
-      // 25% — completely random spot
-      spawnX = 40 + Math.random()*(W-80);
-      spawnY = 40 + Math.random()*(H-80);
+      spawnX=40+Math.random()*(W-80);
+      spawnY=40+Math.random()*(H-80);
     }
-
-    const newR = 8 + Math.random() * 28;
-    const bud  = new Blob(spawnX, spawnY, 3, nextColor());
-    bud.baseR  = newR;
-    bud.maxR   = newR;
-    bud.vx     = (Math.random()-.5)*0.8;
-    bud.vy     = (Math.random()-.5)*0.8;
+    const newR=8+Math.random()*28;
+    const bud=new Blob(spawnX,spawnY,3,nextColor());
+    bud.baseR=newR; bud.maxR=newR;
+    bud.vx=(Math.random()-.5)*0.8;
+    bud.vy=(Math.random()-.5)*0.8;
     blobs.push(bud);
   }
 }
 
-window.toggleHelp = () => {
-  document.getElementById('help-panel').classList.toggle('visible');
-};
-
 window.resetAll=()=>{
-  blobs=[new Blob(W/2, H/2, 28, nextColor())];
+  blobs=[new Blob(W/2,H/2,28,nextColor())];
   colorIdx=1;
   env.humidPoints=[]; env.heatPoints=[];
   clickFlashes=[]; humidFlashes=[];
@@ -1099,43 +1052,35 @@ function loop(){
   env.lightTarget=spaceDown?0:1;
   env.light+=(env.lightTarget-env.light)*.06;
   env.wind=1-env.light;
-  // ── Global temperature: rises while held, cools when released ──
-  if(mouseDown) {
-    env.globalTemp = Math.min(1, env.globalTemp + 0.004);
+  if(mouseDown){
+    env.globalTemp=Math.min(1,env.globalTemp+0.004);
   } else {
-    env.globalTemp = Math.max(0.43, env.globalTemp - 0.005); // 15°C baseline
+    env.globalTemp=Math.max(0.43,env.globalTemp-0.005);
   }
-
-  // flash only when temp is actively rising
-  if(mouseDown) {
-    clickFlashes.push({ x:env.mouseX, y:env.mouseY, strength: Math.min(0.7, env.globalTemp * 0.8) });
+  if(mouseDown){
+    clickFlashes.push({x:env.mouseX,y:env.mouseY,strength:Math.min(0.7,env.globalTemp*0.8)});
   }
-
-  // continuous humidity while cmd+mouse held
-  if(mouseDown && cmdDown) {
-    humidFlashes.push({ x:env.mouseX, y:env.mouseY, strength:0.5 });
-    env.humidPoints.push({ x:env.mouseX, y:env.mouseY, r:60+Math.random()*20, strength:0.7 });
+  if(mouseDown&&cmdDown){
+    humidFlashes.push({x:env.mouseX,y:env.mouseY,strength:0.5});
+    env.humidPoints.push({x:env.mouseX,y:env.mouseY,r:60+Math.random()*20,strength:0.7});
   }
-  clickFlashes = clickFlashes.map(cf=>({...cf, strength: cf.strength * 0.85})).filter(cf=>cf.strength > 0.01);
-  humidFlashes = humidFlashes.map(cf=>({...cf, strength: cf.strength * 0.88})).filter(cf=>cf.strength > 0.01);
-  env.humidPoints=env.humidPoints
-    .map(hp=>({...hp,strength:hp.strength*.992}))
-    .filter(hp=>hp.strength>.02);
+  clickFlashes=clickFlashes.map(cf=>({...cf,strength:cf.strength*0.85})).filter(cf=>cf.strength>0.01);
+  humidFlashes=humidFlashes.map(cf=>({...cf,strength:cf.strength*0.88})).filter(cf=>cf.strength>0.01);
+  env.humidPoints=env.humidPoints.map(hp=>({...hp,strength:hp.strength*.992})).filter(hp=>hp.strength>.02);
   env.humid=Math.min(1,env.humidPoints.reduce((s,hp)=>s+hp.strength,0)/3);
-  const heat = env.globalTemp;
+  const heat=env.globalTemp;
   blobs=blobs.filter(b=>b.r>2);
   blobs.forEach(b=>b.update());
   tryBud();
   render();
-  // bar color: green → yellow → red
-  const tempColor = heat < 0.5
-    ? `rgba(${Math.floor(heat*2*200)},${180},80,0.8)`
-    : `rgba(220,${Math.floor((1-heat)*2*180)},40,0.8)`;
-  const tempC = Math.round(10 + env.globalTemp * 35); // 0~1 → 10~45°C
-  const tempLabel = document.getElementById('temp-label');
-  if(tempLabel) tempLabel.textContent = tempC + '°C';
+  const tempColor=heat<0.5
+    ?`rgba(${Math.floor(heat*2*200)},${180},80,0.8)`
+    :`rgba(220,${Math.floor((1-heat)*2*180)},40,0.8)`;
+  const tempC=Math.round(10+env.globalTemp*35);
+  const tempLabel=document.getElementById('temp-label');
+  if(tempLabel) tempLabel.textContent=tempC+'°C';
   barTemp.style.width=(heat*100)+'%';
-  barTemp.style.background = tempColor;
+  barTemp.style.background=tempColor;
   barWind.style.width=((1-env.light)*100)+'%';
   barHumid.style.width=(env.humid*100)+'%';
   if(heat>.3) cursorEl.classList.add('hot');
@@ -1143,13 +1088,12 @@ function loop(){
   requestAnimationFrame(loop);
 }
 
-// init
 resizeCanvas();
-blobs = [new Blob(W/2, H/2, 28, nextColor())];
+blobs=[new Blob(W/2,H/2,28,nextColor())];
 document.body.focus();
 loop();
 
-window.addEventListener('resize', resizeCanvas);
+window.addEventListener('resize',resizeCanvas);
 </script>
 </body>
 </html>
